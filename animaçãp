@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animação Interativa</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(120deg, #1E3A8A, #FACC15, #FFFFFF);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        canvas {
+            position: absolute;
+        }
+        #playButton {
+            position: relative;
+            z-index: 10;
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #FFD700;
+            color: #1E3A8A;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        #playButton:hover {
+            background: #FACC15;
+        }
+    </style>
+</head>
+<body>
+    <button id="playButton">Tocar Música</button>
+    <audio id="music" loop>
+        <source src="musica.mp3" type="audio/mpeg">
+    </audio>
+    <script>
+        const canvas = document.createElement("canvas");
+        document.body.appendChild(canvas);
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+
+        class Particle {
+            constructor(x, y, size, color) {
+                this.x = x;
+                this.y = y;
+                this.size = size;
+                this.color = color;
+                this.velocityX = (Math.random() - 0.5) * 2;
+                this.velocityY = (Math.random() - 0.5) * 2;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+            update() {
+                this.x += this.velocityX;
+                this.y += this.velocityY;
+                if (this.x < 0 || this.x > canvas.width) this.velocityX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.velocityY *= -1;
+                this.draw();
+            }
+        }
+
+        function createParticles() {
+            for (let i = 0; i < 50; i++) {
+                let size = Math.random() * 5 + 2;
+                let x = Math.random() * canvas.width;
+                let y = Math.random() * canvas.height;
+                let colors = ["#FFD700", "#1E90FF", "#FFFFFF"];
+                let color = colors[Math.floor(Math.random() * colors.length)];
+                particles.push(new Particle(x, y, size, color));
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(particle => particle.update());
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener("resize", () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        document.getElementById("playButton").addEventListener("click", () => {
+            document.getElementById("music").play();
+            document.getElementById("playButton").style.display = "none";
+        });
+
+        canvas.addEventListener("mousemove", (event) => {
+            let size = Math.random() * 5 + 3;
+            let colors = ["#FFD700", "#1E90FF", "#FFFFFF"];
+            let color = colors[Math.floor(Math.random() * colors.length)];
+            particles.push(new Particle(event.clientX, event.clientY, size, color));
+            if (particles.length > 100) particles.shift();
+        });
+
+        createParticles();
+        animate();
+    </script>
+</body>
+</html>
